@@ -5,10 +5,83 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from tqdm import tqdm
 
 # Define the order of the suffixes
-suffix_order = ["n", "n1", "n2", "n3", "n4", "n5", "n6","n7","n8" ,"n9","n10","n11","n12","pron", "v", "v1", "v2", "v3", "v4", "v5","v6","v7","adj",
-                
-                
-                 "adj1", "adj2","adj3", "adv", "adv1", "prep","con","conj","int","int1","int2","combform", "combform1", "combform2"]
+suffix_order =["n",
+"n1",
+"n2",
+"n3",
+"n4",
+"n5",
+"n6",
+"n7",
+"n8",
+"n9",
+"n10",
+"n11",
+"n12",
+"pron",
+"pron1",
+"pron2",
+"pron3",
+"pron4",
+"pron5",
+"adj",
+"adj1",
+"adj2",
+"adj3",
+"adj4",
+"adj5",
+"adj6",
+"v",
+"v1",
+"v3",
+"v3",
+"v4",
+"v5",
+"v6",
+"v7",
+"v8",
+"v9",
+"v10",
+"v11",
+"v12",
+"v13",
+"adv",
+"adv1",
+"adv2",
+"adv3",
+"adv4",
+"adv5",
+"prep",
+"prep1",
+"prep2",
+"prep3",
+"conj",
+"conj1",
+"conj2",
+"conj3",
+"int",
+"int1",
+"int2",
+"int3",
+"prefix",
+"prefix1",
+"prefix2",
+"prefix3",
+"prefix4",
+"prefix5",
+"prefix6",
+"suffix",
+"suffix1",
+"suffix2",
+"suffix3",
+"suffix4",
+"suffix5",
+"suffix6",
+"combform",
+"combform1",
+"combform2",
+"combform3",
+"combform4",]
                 
 
 # Function to extract suffix from URL
@@ -37,8 +110,8 @@ def fetch_url(url):
 def main():
     # Define the input file path and output file paths
     input_file_path = r"C:\Users\style\Desktop\10 july py\oxfor dictionary urls.txt"
-    output_txt_path = "oed dictionary.txt"
-    non_included_suffix_txt_path = "non_included_suffix.txt"
+    output_txt_path = "sorted my fuck.txt"
+    non_included_suffix_txt_path = "non_included_suffixsf.txt"
 
     # Direct input of URLs (with options for double quotes and commas, or by space)
     direct_input = ""  # Add your URLs here, either as a list of strings or a single string separated by spaces
