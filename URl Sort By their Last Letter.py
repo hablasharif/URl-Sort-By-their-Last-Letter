@@ -1,11 +1,15 @@
-import pandas as pd
-from PyPDF2 import PdfReader
-from bs4 import BeautifulSoup
 import os
+import pandas as pd
+import pyarrow.parquet as pq
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from tqdm import tqdm
 
 # Define the order of the suffixes
-suffix_order = ["n", "n1", "n2", "n3", "n4", "n5", "n6", "pro", "v", "v1", "v2", "adj", "adj1", "adj2", "adv", "adv1", "pre", "con", "conj"]
+suffix_order = ["n", "n1", "n2", "n3", "n4", "n5", "n6","n7","n8" ,"n9","n10","n11","n12","pron", "v", "v1", "v2", "v3", "v4", "v5","v6","v7","adj",
+                
+                
+                 "adj1", "adj2","adj3", "adv", "adv1", "prep","con","conj","int","int1","int2","combform", "combform1", "combform2"]
+                
 
 # Function to extract suffix from URL
 def extract_suffix(url):
@@ -24,99 +28,80 @@ def read_urls_from_txt(file_path):
     with open(file_path, 'r') as file:
         return [line.strip() for line in file.readlines()]
 
-# Function to read URLs from an Excel file
-def read_urls_from_excel(file_path):
-    df = pd.read_excel(file_path)
-    return df[df.columns[0]].tolist()
+# Function to fetch URLs (example CPU-bound task)
+def fetch_url(url):
+    # Placeholder CPU-bound task
+    return url
 
-# Function to read URLs from a PDF file
-def read_urls_from_pdf(file_path):
-    reader = PdfReader(file_path)
+# Main function to orchestrate processing
+def main():
+    # Define the input file path and output file paths
+    input_file_path = r"C:\Users\style\Desktop\10 july py\oxfor dictionary urls.txt"
+    output_txt_path = "oed dictionary.txt"
+    non_included_suffix_txt_path = "non_included_suffix.txt"
+
+    # Direct input of URLs (with options for double quotes and commas, or by space)
+    direct_input = ""  # Add your URLs here, either as a list of strings or a single string separated by spaces
+    direct_input_urls = []
+
+    if direct_input:
+        if '"' in direct_input or ',' in direct_input:
+            direct_input_urls = [url.strip() for url in direct_input.split(',')]
+        else:
+            direct_input_urls = direct_input.split()
+
+    # Read URLs from the input file
     urls = []
-    for page in reader.pages:
-        text = page.extract_text()
-        urls.extend([line.strip() for line in text.splitlines() if line.startswith("http")])
-    return urls
+    if os.path.exists(input_file_path):
+        urls.extend(read_urls_from_txt(input_file_path))
+    urls.extend(direct_input_urls)
 
-# Function to read URLs from an HTML file
-def read_urls_from_html(file_path):
-    with open(file_path, 'r') as file:
-        soup = BeautifulSoup(file, 'html.parser')
-    return [a['href'] for a in soup.find_all('a', href=True) if a['href'].startswith("http")]
+    # Count total input URLs
+    total_input_urls = len(urls)
 
-# Function to read URLs from any file
-def read_urls(file_path):
-    if file_path.endswith('.txt'):
-        return read_urls_from_txt(file_path)
-    elif file_path.endswith('.xlsx'):
-        return read_urls_from_excel(file_path)
-    elif file_path.endswith('.pdf'):
-        return read_urls_from_pdf(file_path)
-    elif file_path.endswith('.html'):
-        return read_urls_from_html(file_path)
-    else:
-        raise ValueError("Unsupported file type: {}".format(file_path))
+    # Sort URLs based on the custom sort function
+    sorted_urls = sorted(urls, key=custom_sort_key)
 
-# Define the input file path and output file paths
-input_file_path = r"C:\Users\style\Desktop\10 july py\oxfor dictionary urls.txt"
-output_txt_path = "oed dictionary.txt"
-output_excel_path = "oed dictionary.xlsx"
-output_html_path = "oed dictionary.html"
-non_included_suffix_txt_path = "non_included_suffix.txt"
+    # Process URLs using multiprocessing for CPU-bound tasks
+    processed_urls = []
+    urls_not_included = []
+    suffix_counts = {suffix: 0 for suffix in suffix_order}
 
-# Read URLs from the input file
-urls = read_urls(input_file_path)
+    # Calculate total items for tqdm
+    total_items = len(sorted_urls)
 
-# Count total input URLs
-total_input_urls = len(urls)
+    # Using ProcessPoolExecutor for concurrent processing
+    with ProcessPoolExecutor() as executor:
+        futures = [executor.submit(fetch_url, url) for url in sorted_urls]
 
-# Sort URLs based on the custom sort function
-sorted_urls = sorted(urls, key=custom_sort_key)
+        for future in tqdm(as_completed(futures), total=total_items, desc="Processing URLs"):
+            url = future.result()
+            processed_urls.append(url)
+            suffix = extract_suffix(url)
+            if suffix in suffix_order:
+                suffix_counts[suffix] += 1
+            else:
+                urls_not_included.append(url)
 
-# Filter URLs based on suffix and count occurrences
-urls_to_display = []
-urls_not_included = []
-suffix_counts = {suffix: 0 for suffix in suffix_order}
+    # Calculate total output URLs
+    total_output_urls = len(processed_urls)
 
-for url in tqdm(sorted_urls, desc="Processing URLs"):
-    suffix = extract_suffix(url)
-    if suffix in suffix_order:
-        urls_to_display.append(url)
-        suffix_counts[suffix] += 1
-    else:
-        urls_not_included.append(url)
+    # Save the results to different formats
+    with open(output_txt_path, 'w') as file:
+        for url in processed_urls:
+            file.write(f"{url}\n")
 
-# Count total output URLs
-total_output_urls = len(urls_to_display)
+    # Save URLs with suffixes not included in the predefined order
+    with open(non_included_suffix_txt_path, 'w') as file:
+        for url in urls_not_included:
+            file.write(f"{url}\n")
 
-# Save the results to different formats
-with open(output_txt_path, 'w') as file:
-    for url in urls_to_display:
-        file.write(f"{url}\n")
+    # Display results
+    print("Total input URLs:", total_input_urls)
+    print("Total output URLs:", total_output_urls)
+    print("Counts by suffix:")
+    for suffix, count in suffix_counts.items():
+        print(f"{suffix}: {count}")
 
-df = pd.DataFrame(urls_to_display, columns=["URL"])
-df.to_excel(output_excel_path, index=False)
-
-html_content = '<html><body><ul>'
-for url in urls_to_display:
-    html_content += f'<li><a href="{url}">{url}</a></li>'
-html_content += '</ul></body></html>'
-
-with open(output_html_path, 'w') as file:
-    file.write(html_content)
-
-# Save URLs with suffixes not included in the predefined order
-with open(non_included_suffix_txt_path, 'w') as file:
-    for url in urls_not_included:
-        file.write(f"{url}\n")
-
-# Display results
-print("Total input URLs:", total_input_urls)
-print("Total output URLs:", total_output_urls)
-print("Counts by suffix:")
-for suffix, count in suffix_counts.items():
-    print(f"{suffix}: {count}")
-
-print("\nURLs with suffixes not included in the predefined order:")
-for url in urls_not_included:
-    print(url)
+if __name__ == "__main__":
+    main()
