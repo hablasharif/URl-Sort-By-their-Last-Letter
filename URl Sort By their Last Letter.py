@@ -18,6 +18,9 @@ suffix_order =["n",
 "n10",
 "n11",
 "n12",
+"n13",
+"n14",
+"n15",
 "pron",
 "pron1",
 "pron2",
@@ -55,6 +58,7 @@ suffix_order =["n",
 "prep1",
 "prep2",
 "prep3",
+"prep4",
 "conj",
 "conj1",
 "conj2",
@@ -63,6 +67,7 @@ suffix_order =["n",
 "int1",
 "int2",
 "int3",
+"int4",
 "prefix",
 "prefix1",
 "prefix2",
@@ -70,6 +75,7 @@ suffix_order =["n",
 "prefix4",
 "prefix5",
 "prefix6",
+"preffix7",
 "suffix",
 "suffix1",
 "suffix2",
@@ -77,11 +83,12 @@ suffix_order =["n",
 "suffix4",
 "suffix5",
 "suffix6",
+"suffix7",
 "combform",
 "combform1",
 "combform2",
 "combform3",
-"combform4",]
+"combform4","combform5"]
                 
 
 # Function to extract suffix from URL
@@ -109,9 +116,9 @@ def fetch_url(url):
 # Main function to orchestrate processing
 def main():
     # Define the input file path and output file paths
-    input_file_path = r"C:\Users\style\Desktop\10 july py\oxfor dictionary urls.txt"
-    output_txt_path = "sorted my fuck.txt"
-    non_included_suffix_txt_path = "non_included_suffixsf.txt"
+    input_file_path = r"C:\Users\style\oedsitemapurls.txt"
+    output_txt_path = "last oed site map.txt"
+    non_included_suffix_txt_path = "not pattern matched urls.txt"
 
     # Direct input of URLs (with options for double quotes and commas, or by space)
     direct_input = ""  # Add your URLs here, either as a list of strings or a single string separated by spaces
